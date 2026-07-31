@@ -1,0 +1,87 @@
+---
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  essay: CollectionEntry<"essays">;
+}
+
+const { essay } = Astro.props;
+const date = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  timeZone: "UTC",
+}).format(essay.data.date);
+---
+
+<BaseLayout
+  title={essay.data.title}
+  description={essay.data.summary}
+  image={`/og/writing/${essay.id}.png`}
+  canonicalPath={`/writing/${essay.id}/`}
+  pageClass="essay-page"
+  type="article"
+  publishedTime={essay.data.date}
+>
+  <article class="essay">
+    <header class="essay-header">
+      <a class="essay-back" href="/writing/">← writing</a>
+      <h1>{essay.data.title}</h1>
+      <p class="essay-deck">{essay.data.summary}</p>
+      <div class="essay-meta">
+        <time datetime={essay.data.date.toISOString()}>{date}</time>
+        {
+          essay.data.tags.length > 0 && (
+            <span>{essay.data.tags.map((tag) => tag.toLowerCase()).join(" · ")}</span>
+          )
+        }
+      </div>
+    </header>
+    <div class="prose essay-body">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .essay {
+    max-width: 68ch;
+  }
+
+  .essay-header {
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .essay-back {
+    color: var(--ink-3);
+    font: 400 0.6875rem/1.4 "IBM Plex Mono", monospace;
+  }
+
+  .essay-header h1 {
+    max-width: 24ch;
+    margin: 28px 0 12px;
+    font: 500 1.75rem/1.2 "Newsreader", serif;
+  }
+
+  .essay-deck {
+    max-width: 58ch;
+    margin: 0;
+    color: var(--ink-2);
+    font: 400 1.0625rem/1.55 "Newsreader", serif;
+  }
+
+  .essay-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-top: 24px;
+    color: var(--ink-3);
+    font: 400 0.6875rem/1.5 "IBM Plex Mono", monospace;
+  }
+
+  .essay-body {
+    margin-top: 36px;
+  }
+</style>

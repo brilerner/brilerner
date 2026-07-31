@@ -1,0 +1,474 @@
+---
+import { EyeOff } from "@lucide/astro";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  publications: CollectionEntry<"publications">[];
+  initialField?: "all" | "clinical" | "physics";
+  enhance?: boolean;
+}
+
+const { publications, initialField = "all", enhance = false } = Astro.props;
+const visible =
+  initialField === "all"
+    ? publications
+    : publications.filter((publication) => publication.data.field === initialField);
+const years = [...new Set(visible.map((publication) => publication.data.year))];
+const labels = { all: "all", clinical: "clinical ML", physics: "physics" } as const;
+const filterOptions = Object.entries(labels) as [keyof typeof labels, string][];
+---
+
+<div class="publication-tool" data-publication-tool data-enhance={enhance ? "true" : "false"}>
+  <div class="filter-header">
+    <nav class="filter-links" aria-label="Filter publications">
+      {
+        filterOptions.map(([value, label]) => (
+          <a
+            href={value === "all" ? "/publications/" : `/publications/${value}/`}
+            aria-current={initialField === value ? "page" : undefined}
+          >
+            {label}
+          </a>
+        ))
+      }
+    </nav>
+
+    {
+      enhance && (
+        <fieldset class="filter-fieldset" hidden>
+          <legend>Filter publications by field</legend>
+          {filterOptions.map(([value, label]) => (
+            <label>
+              <input type="radio" name="publication-field" value={value} checked={value === "all"} />
+              <span>{label}</span>
+            </label>
+          ))}
+        </fieldset>
+      )
+    }
+
+    <p class="result-count">
+      <span data-result-count>{visible.length}</span>
+      <span>of {publications.length}</span>
+    </p>
+  </div>
+
+  {
+    enhance && (
+      <button class="excluded-row" type="button" hidden data-excluded-row aria-expanded="false">
+        <EyeOff size={14} stroke-width={1.5} aria-hidden="true" />
+        <span><b data-excluded-count>0</b> publications excluded by current criteria</span>
+        <span class="excluded-action" data-excluded-action>reveal</span>
+      </button>
+    )
+  }
+
+  <div class="publication-list">
+    {
+      years.map((year) => (
+        <section class="publication-year" data-year={year}>
+          <h2>{year}</h2>
+          <ol>
+            {visible
+              .filter((publication) => publication.data.year === year)
+              .map((publication) => (
+                <li
+                  id={publication.id}
+                  class:list={[
+                    "publication",
+                    publication.data.status === "in-prep" && "publication-in-prep",
+                  ]}
+                  data-field={publication.data.field}
+                >
+                  <article>
+                    <h3>{publication.data.title}</h3>
+                    <p class="authors">
+                      {publication.data.authors.map((author, index) => (
+                        <>
+                          {author === "B. Lerner" ? <strong>{author}</strong> : author}
+                          {index < publication.data.authors.length - 1 ? ", " : ""}
+                        </>
+                      ))}
+                    </p>
+                    <p class="venue">
+                      {publication.data.venue}
+                      {publication.data.status === "in-prep" && (
+                        <span class="status-tag">in preparation</span>
+                      )}
+                    </p>
+                    {(publication.data.pdf ||
+                      publication.data.doi ||
+                      publication.data.code ||
+                      publication.data.bibtex) && (
+                      <div class="publication-links">
+                        {publication.data.pdf && <a href={publication.data.pdf}>pdf</a>}
+                        {publication.data.doi && <a href={publication.data.doi}>doi</a>}
+                        {publication.data.code && <a href={publication.data.code}>code</a>}
+                        {publication.data.bibtex && (
+                          <button type="button" data-bibtex={publication.data.bibtex}>
+                            bibtex
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </article>
+                </li>
+              ))}
+          </ol>
+        </section>
+      ))
+    }
+  </div>
+
+  <p class="filter-announcement visually-hidden" aria-live="polite" data-filter-announcement></p>
+</div>
+
+{
+  enhance && (
+    <script>
+      const tool = document.querySelector<HTMLElement>("[data-publication-tool][data-enhance='true']");
+      if (tool) {
+        const links = tool.querySelector<HTMLElement>(".filter-links");
+        const fieldset = tool.querySelector<HTMLFieldSetElement>(".filter-fieldset");
+        const radios = [...tool.querySelectorAll<HTMLInputElement>("input[name='publication-field']")];
+        const publications = [...tool.querySelectorAll<HTMLElement>(".publication")];
+        const years = [...tool.querySelectorAll<HTMLElement>(".publication-year")];
+        const count = tool.querySelector<HTMLElement>("[data-result-count]");
+        const excludedRow = tool.querySelector<HTMLButtonElement>("[data-excluded-row]");
+        const excludedCount = tool.querySelector<HTMLElement>("[data-excluded-count]");
+        const excludedAction = tool.querySelector<HTMLElement>("[data-excluded-action]");
+        const announcement = tool.querySelector<HTMLElement>("[data-filter-announcement]");
+        let showingExcluded = false;
+
+        links?.setAttribute("hidden", "");
+        fieldset?.removeAttribute("hidden");
+
+        const queryField = new URLSearchParams(location.search).get("field");
+        const initial =
+          queryField === "clinical" || queryField === "physics" ? queryField : "all";
+        const initialRadio = radios.find((radio) => radio.value === initial);
+        if (initialRadio) initialRadio.checked = true;
+
+        const update = (field: string, announce = true) => {
+          showingExcluded = false;
+          const shown = publications.filter((publication) => {
+            const matches = field === "all" || publication.dataset.field === field;
+            publication.hidden = !matches;
+            publication.classList.remove("is-revealed-excluded");
+            return matches;
+          }).length;
+          years.forEach((year) => {
+            year.hidden = !year.querySelector(".publication:not([hidden])");
+          });
+          if (count) count.textContent = String(shown);
+          const excluded = publications.length - shown;
+          if (excludedRow) {
+            excludedRow.hidden = excluded === 0;
+            excludedRow.setAttribute("aria-expanded", "false");
+          }
+          if (excludedCount) excludedCount.textContent = String(excluded);
+          if (excludedAction) excludedAction.textContent = "reveal";
+          document.documentElement.dataset.publicationField = field;
+
+          const url = new URL(location.href);
+          if (field === "all") url.searchParams.delete("field");
+          else url.searchParams.set("field", field);
+          history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+          if (announce && announcement) {
+            announcement.textContent = `${shown} publications shown, ${excluded} excluded`;
+          }
+        };
+
+        radios.forEach((radio) => {
+          radio.addEventListener("change", () => update(radio.value));
+        });
+
+        excludedRow?.addEventListener("click", () => {
+          const field = radios.find((radio) => radio.checked)?.value ?? "all";
+          showingExcluded = !showingExcluded;
+          publications.forEach((publication) => {
+            const excluded = field !== "all" && publication.dataset.field !== field;
+            publication.hidden = excluded && !showingExcluded;
+            publication.classList.toggle("is-revealed-excluded", excluded && showingExcluded);
+          });
+          years.forEach((year) => {
+            year.hidden = !year.querySelector(".publication:not([hidden])");
+          });
+          excludedRow.setAttribute("aria-expanded", String(showingExcluded));
+          if (excludedAction) excludedAction.textContent = showingExcluded ? "hide" : "reveal";
+          if (announcement) {
+            announcement.textContent = showingExcluded
+              ? "Excluded publications revealed"
+              : "Excluded publications hidden";
+          }
+        });
+
+        update(initial, false);
+      }
+
+      document.querySelectorAll<HTMLButtonElement>("[data-bibtex]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const bibtex = button.dataset.bibtex;
+          if (!bibtex) return;
+          try {
+            await navigator.clipboard.writeText(bibtex);
+          } catch {
+            button.textContent = "copy failed";
+            return;
+          }
+          const previous = button.textContent;
+          button.textContent = "copied";
+          window.setTimeout(() => {
+            button.textContent = previous;
+          }, 1200);
+        });
+      });
+    </script>
+  )
+}
+
+<style>
+  .publication-tool {
+    margin-top: 28px;
+  }
+
+  .filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .filter-links,
+  .filter-fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .filter-links a,
+  .filter-fieldset label span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--rule-2);
+    border-radius: 4px;
+    color: var(--ink-2);
+    cursor: pointer;
+    font: 400 0.75rem/1 "IBM Plex Mono", monospace;
+    text-decoration: none;
+  }
+
+  .filter-links a[aria-current="page"],
+  .filter-fieldset input:checked + span {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .filter-fieldset legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .filter-fieldset input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .filter-fieldset input:focus-visible + span {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .result-count {
+    flex: none;
+    margin: 0;
+    color: var(--ink-3);
+    font: 400 0.6875rem/1 "IBM Plex Mono", monospace;
+  }
+
+  .result-count span:first-child {
+    color: var(--ink);
+    font-size: 0.8125rem;
+  }
+
+  .excluded-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 40px;
+    margin: 16px 0 0;
+    padding: 0 12px;
+    border: 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--ink-3);
+    cursor: pointer;
+    font: 400 0.6875rem/1.3 "IBM Plex Mono", monospace;
+    text-align: left;
+  }
+
+  .excluded-row b {
+    color: inherit;
+    font-weight: 500;
+  }
+
+  .excluded-action {
+    color: var(--ink-2);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .publication-list {
+    margin-top: 4px;
+  }
+
+  .publication-year {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 24px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .publication-year:first-child {
+    border-top: 0;
+  }
+
+  .publication-year h2 {
+    margin: 20px 0 0;
+    color: var(--ink-3);
+    font: 500 0.75rem/1.4 "IBM Plex Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .publication-year ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .publication {
+    padding: 20px 0 22px;
+    border-bottom: 1px solid var(--rule);
+    transition:
+      opacity 160ms ease-out,
+      background-color 160ms ease-out;
+  }
+
+  .publication[hidden],
+  .publication-year[hidden] {
+    display: none;
+  }
+
+  .publication.is-revealed-excluded {
+    margin-inline: -12px;
+    padding-inline: 12px;
+    background: var(--surface);
+    opacity: 0.58;
+  }
+
+  .publication h3 {
+    max-width: 60ch;
+    margin: 0;
+    font: 500 1.0625rem/1.38 "Newsreader", serif;
+  }
+
+  .authors,
+  .venue {
+    margin: 7px 0 0;
+    color: var(--ink-2);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .authors strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .venue {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem;
+  }
+
+  .status-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 1px solid var(--rule-2);
+    color: var(--flag);
+  }
+
+  .publication-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-top: 11px;
+    font: 400 0.6875rem/1.4 "IBM Plex Mono", monospace;
+  }
+
+  .publication-links a,
+  .publication-links button {
+    min-height: 28px;
+    padding: 5px 9px;
+    border: 0;
+    border-left: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .publication-links > :last-child {
+    border-right: 1px solid var(--rule);
+  }
+
+  .publication-links button {
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 520px) {
+    .filter-header {
+      align-items: end;
+    }
+
+    .publication-year {
+      display: block;
+    }
+
+    .publication-year h2 {
+      margin: 20px 0 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--rule-2);
+    }
+
+    .publication {
+      padding-top: 16px;
+    }
+  }
+</style>

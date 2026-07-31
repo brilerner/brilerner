@@ -1,0 +1,18 @@
+---
+import { site } from "../data/site";
+
+const updated = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "UTC",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+}).format(new Date());
+---
+
+<footer class="site-footer">
+  <span>updated <time datetime={updated}>{updated}</time></span>
+  <span aria-hidden="true">·</span>
+  <a href="/colophon/">colophon</a>
+  <span aria-hidden="true">·</span>
+  <a href={site.repository}>source</a>
+</footer>

@@ -10,11 +10,15 @@ Gemfile.lock
 
 # Ignore files created by npm
 node_modules
-package-lock.json
+dist/
+.astro/
 
 # Ignore the vendor file at root level and bundle for alternative installation
 /vendor/
 .bundle/
+
+# Private design inputs; publish only explicitly migrated assets.
+__handoffs/
 
 # Ignore folders related to IDEs
 .vscode/

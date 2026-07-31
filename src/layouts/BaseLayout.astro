@@ -1,0 +1,115 @@
+---
+import Footer from "../components/Footer.astro";
+import Sidebar from "../components/Sidebar.astro";
+import { site } from "../data/site";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalPath?: string;
+  pageClass?: string;
+  type?: "website" | "article";
+  publishedTime?: Date;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title,
+  description = site.description,
+  image = "/og/home.png",
+  canonicalPath = Astro.url.pathname,
+  pageClass = "",
+  type = "website",
+  publishedTime,
+  jsonLd,
+} = Astro.props;
+const pageTitle = title ? `${title} · ${site.name}` : site.title;
+const canonical = new URL(canonicalPath, site.url);
+const socialImage = new URL(image, site.url);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem("theme");
+        const theme = saved === "light" || saved === "dark"
+          ? saved
+          : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link
+      rel="preload"
+      href="/fonts/newsreader-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/ibm-plex-mono-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="alternate" type="application/rss+xml" title="Brian Lerner writing" href="/rss.xml" />
+    <link rel="canonical" href={canonical} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    <slot name="head" />
+  </head>
+  <body class={pageClass}>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="site-shell">
+      <Sidebar />
+      <div class="content-shell">
+        <main id="main-content" tabindex="-1">
+          <slot />
+        </main>
+        <Footer />
+      </div>
+    </div>
+    <script is:inline>
+      (() => {
+        const button = document.querySelector(".theme-toggle");
+        if (!(button instanceof HTMLButtonElement)) return;
+        const label = button.querySelector(".theme-label");
+        const update = () => {
+          const dark = document.documentElement.dataset.theme === "dark";
+          button.setAttribute("aria-label", `Use ${dark ? "light" : "dark"} theme`);
+          if (label) label.textContent = dark ? "light" : "dark";
+        };
+        button.addEventListener("click", () => {
+          const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+          document.documentElement.dataset.theme = next;
+          localStorage.setItem("theme", next);
+          update();
+        });
+        update();
+      })();
+    </script>
+  </body>
+</html>

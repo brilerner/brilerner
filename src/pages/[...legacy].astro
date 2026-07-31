@@ -1,0 +1,25 @@
+---
+export function getStaticPaths() {
+  const redirects = [
+    ["about", "/"],
+    ["resume", "/cv/"],
+    ["year-archive", "/writing/"],
+    ["portfolio", "/"],
+    ["posts/2025/07/here-we-go", "/writing/here-we-go/"],
+    ["posts/2025/08/mlhc-2025", "/writing/mlhc-2025/"],
+    ["posts/2026/07/chil-2026", "/writing/chil-2026/"],
+    ["publication/2021-10-01-nanopatch-antennas", "/publications/#2021-nanopatch-antennas"],
+    ["publication/2021-10-14-compressed-sensing-stm", "/publications/#2021-compressed-sensing-stm"],
+    ["publication/2021-03-01-waveform-snsdp", "/publications/#2021-waveform-snspd"],
+    ["publication/2021-11-01-magnetostriction-rucl3", "/publications/#2021-magnetostriction-rucl3"],
+    ["publication/2024-01-01-llm-brain-tumor-diagnosis", "/publications/#2024-interactive-image-retrieval"],
+  ] as const;
+
+  return redirects.map(([legacy, target]) => ({
+    params: { legacy },
+    props: { target },
+  }));
+}
+
+return Astro.redirect(Astro.props.target, 301);
+---

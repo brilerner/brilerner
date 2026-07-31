@@ -1,0 +1,41 @@
+---
+import { getCollection } from "astro:content";
+import PublicationsList from "../../components/PublicationsList.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export function getStaticPaths() {
+  return [
+    { params: { field: "clinical" }, props: { field: "clinical" as const } },
+    { params: { field: "physics" }, props: { field: "physics" as const } },
+  ];
+}
+
+const { field } = Astro.props;
+const publications = (await getCollection("publications")).sort(
+  (a, b) => b.data.year - a.data.year || a.id.localeCompare(b.id),
+);
+const label = field === "clinical" ? "Clinical ML" : "Physics";
+const description =
+  field === "clinical"
+    ? "Brian Lerner's publications in healthcare AI and multimodal clinical machine learning."
+    : "Brian Lerner's publications in quantum materials, imaging, and instrumentation.";
+---
+
+<BaseLayout
+  title={`${label} publications`}
+  description={description}
+  image="/og/publications.png"
+  pageClass="publications-page"
+>
+  <header class="page-header">
+    <p class="eyebrow">Research record</p>
+    <h1>{label} publications</h1>
+    <p>
+      {field === "clinical"
+        ? "Work in healthcare AI, multimodal learning, and clinically grounded model development."
+        : "Work in quantum materials, scanning probe imaging, and optical instrumentation."}
+    </p>
+  </header>
+
+  <PublicationsList publications={publications} initialField={field} />
+</BaseLayout>

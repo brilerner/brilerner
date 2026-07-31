@@ -1,0 +1,24 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Not found" description="The requested page could not be found.">
+  <header class="page-header">
+    <p class="eyebrow">404</p>
+    <h1>Page not found</h1>
+    <p>The address may have changed. Return home or continue to the publication list.</p>
+  </header>
+  <nav class="not-found-links" aria-label="Continue browsing">
+    <a href="/">home</a>
+    <a href="/publications/">publications</a>
+  </nav>
+</BaseLayout>
+
+<style>
+  .not-found-links {
+    display: flex;
+    gap: 24px;
+    margin-top: 28px;
+    font: 400 0.8125rem/1.5 "IBM Plex Mono", monospace;
+  }
+</style>

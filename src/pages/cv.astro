@@ -1,0 +1,97 @@
+---
+import { Download, ExternalLink } from "@lucide/astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const description =
+  "Brian Lerner's complete curriculum vitae, including research, publications, teaching, and service.";
+---
+
+<BaseLayout title="CV" description={description} image="/og/cv.png" pageClass="cv-page">
+  <header class="page-header cv-header">
+    <div>
+      <p class="eyebrow">Complete archive</p>
+      <h1>Curriculum vitae</h1>
+    </div>
+    <a class="download-link" href="/cv.pdf" download>
+      <Download size={15} stroke-width={1.5} aria-hidden="true" />
+      download cv (pdf)
+    </a>
+  </header>
+
+  <p class="cv-readout">Brian Lerner · PhD candidate, ECE · updated 2026-07</p>
+
+  <object class="cv-embed" data="/cv.pdf" type="application/pdf" aria-label="Brian Lerner curriculum vitae">
+    <div class="cv-fallback">
+      <p>This browser cannot display the embedded PDF.</p>
+      <a href="/cv.pdf">
+        <ExternalLink size={15} stroke-width={1.5} aria-hidden="true" />
+        open the cv
+      </a>
+    </div>
+  </object>
+</BaseLayout>
+
+<style>
+  .cv-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .download-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--rule-2);
+    font: 500 0.75rem/1 "IBM Plex Mono", monospace;
+    text-decoration: none;
+  }
+
+  .download-link:hover {
+    border-color: var(--ink);
+  }
+
+  .cv-readout {
+    margin: 14px 0;
+    color: var(--ink-3);
+    font: 400 0.6875rem/1.4 "IBM Plex Mono", monospace;
+  }
+
+  .cv-embed {
+    display: block;
+    width: 100%;
+    height: min(76vh, 960px);
+    border: 1px solid var(--rule-2);
+    background: var(--surface);
+  }
+
+  .cv-fallback {
+    padding: 32px;
+    color: var(--ink-2);
+    font-size: 0.9375rem;
+  }
+
+  .cv-fallback a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  @media (max-width: 520px) {
+    .cv-header {
+      display: block;
+    }
+
+    .download-link {
+      margin-top: 20px;
+    }
+
+    .cv-embed {
+      height: 68vh;
+    }
+  }
+</style>

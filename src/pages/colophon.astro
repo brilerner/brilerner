@@ -1,0 +1,48 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { site } from "../data/site";
+---
+
+<BaseLayout
+  title="Colophon"
+  description="Notes on the design and construction of Brian Lerner's website."
+  image="/og/colophon.png"
+>
+  <header class="page-header">
+    <p class="eyebrow">Colophon</p>
+    <h1>Why this site looks like a readout</h1>
+  </header>
+
+  <div class="prose colophon-copy">
+    <p>
+      I spend a lot of time looking at flowsheets, scorecards, and model outputs. They are
+      versions of the same invention: a way to decide which observations deserve attention
+      and how they should sit beside one another. The cool greys, small labels, and ruled
+      lines here borrow that visual language without pretending this website is a clinical
+      tool.
+    </p>
+    <p>
+      Much of my work is the practice of deciding what data counts. That includes what is
+      collected, what is missing, and what should be excluded. The publications filter keeps
+      its excluded work visible for the same reason: missingness can be informative.
+    </p>
+    <p class="build-note">
+      Built with Astro, TypeScript, and plain CSS. The
+      <a href={site.repository}>source is public</a>.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .colophon-copy {
+    margin-top: 36px;
+  }
+
+  .build-note {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-2);
+    font: 400 0.75rem/1.6 "IBM Plex Mono", monospace;
+  }
+</style>

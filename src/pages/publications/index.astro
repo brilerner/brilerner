@@ -1,0 +1,74 @@
+---
+import { getCollection } from "astro:content";
+import PublicationsList from "../../components/PublicationsList.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { site } from "../../data/site";
+
+const publications = (await getCollection("publications")).sort(
+  (a, b) => b.data.year - a.data.year || a.id.localeCompare(b.id),
+);
+const description =
+  "Brian Lerner's publications in multimodal clinical machine learning, medical AI, and experimental physics.";
+const scholarlyArticles = publications.map((publication) => ({
+  "@type": "ScholarlyArticle",
+  headline: publication.data.title,
+  author: publication.data.authors.map((name) => ({ "@type": "Person", name })),
+  datePublished: String(publication.data.year),
+  isPartOf: publication.data.venue,
+  url: `${site.url}/publications/#${publication.id}`,
+  ...(publication.data.doi ? { sameAs: publication.data.doi } : {}),
+}));
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": scholarlyArticles,
+};
+---
+
+<BaseLayout
+  title="Publications"
+  description={description}
+  image="/og/publications.png"
+  pageClass="publications-page"
+  jsonLd={jsonLd}
+>
+  <Fragment slot="head">
+    <script is:inline>
+      (() => {
+        const field = new URLSearchParams(location.search).get("field");
+        document.documentElement.dataset.publicationField =
+          field === "clinical" || field === "physics" ? field : "all";
+      })();
+    </script>
+    {
+      publications.map((publication) => (
+        <>
+          <meta name="citation_title" content={publication.data.title} />
+          {publication.data.authors.map((author) => (
+            <meta name="citation_author" content={author} />
+          ))}
+          <meta name="citation_publication_date" content={String(publication.data.year)} />
+          {publication.data.venue && (
+            <meta name="citation_journal_title" content={publication.data.venue} />
+          )}
+          {publication.data.pdf && (
+            <meta
+              name="citation_pdf_url"
+              content={new URL(publication.data.pdf, site.url).toString()}
+            />
+          )}
+        </>
+      ))
+    }
+  </Fragment>
+
+  <header class="page-header">
+    <p class="eyebrow">Research record</p>
+    <h1>Publications</h1>
+    <p>
+      Clinical machine learning alongside earlier work in quantum materials and
+      instrumentation.
+    </p>
+  </header>
+
+  <PublicationsList publications={publications} enhance />
+</BaseLayout>

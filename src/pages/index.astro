@@ -1,0 +1,284 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { site } from "../data/site";
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: site.name,
+  url: site.url,
+  email: `mailto:${site.email}`,
+  jobTitle: "PhD candidate",
+  affiliation: {
+    "@type": "CollegeOrUniversity",
+    name: "Duke University",
+  },
+  sameAs: [site.scholar, site.github, site.linkedin, site.orcid],
+  knowsAbout: [
+    "Machine learning for healthcare",
+    "Multimodal machine learning",
+    "Traumatic brain injury",
+    "Medical imaging",
+    "Interpretability",
+  ],
+};
+---
+
+<BaseLayout jsonLd={personJsonLd} pageClass="home-page">
+  <section class="home-intro" aria-labelledby="home-heading">
+    <p class="eyebrow">Research and writing</p>
+    <h1 id="home-heading">I build machine learning systems around how care actually works.</h1>
+
+    <div class="summary-wrap">
+      <div class="summary-prose">
+        <p>
+          I'm a PhD candidate at Duke working on machine learning for healthcare. I build
+          <span class="live-term" data-detail="multimodal">multimodal models</span> for
+          <span class="live-term" data-detail="tbi">traumatic brain injury care</span> —
+          combining CT imaging, time-series, and clinical text to understand patient state
+          across the care pathway, with architectures designed to stay
+          <span class="live-term" data-detail="interpretability">interpretable</span>.
+        </p>
+        <p>
+          I spend nearly as much time with clinicians as with models: interviewing and
+          shadowing providers so that what we build is grounded in how care actually works.
+          Before healthcare I did physics — quantum instrumentation and compressed sensing
+          at Oak Ridge — and some of that instinct for measurement still shows up in
+          everything I make.
+        </p>
+        <p>I occasionally write about all of this in the <a href="/writing/">blog</a>.</p>
+      </div>
+
+      <div class="summary-readout" aria-live="polite">
+        <section id="detail-multimodal" class="summary-detail" hidden aria-label="Multimodal model detail">
+          <p class="readout-label">modalities → patient state</p>
+          <div class="modality-map" aria-label="Imaging, time-series, and text converge into patient state">
+            <span>CT</span><i></i>
+            <span>time</span><i></i>
+            <span>text</span><i></i>
+            <b>state</b>
+          </div>
+        </section>
+        <section id="detail-tbi" class="summary-detail" hidden aria-label="Traumatic brain injury data detail">
+          <p class="readout-label">working scale</p>
+          <p class="readout-value">~60k encounters<br />CT + structured EHR</p>
+        </section>
+        <section id="detail-interpretability" class="summary-detail" hidden aria-label="Interpretability detail">
+          <p class="readout-label">interpretability</p>
+          <p class="readout-value">Models that surface useful patient state, not just a score.</p>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const terms = document.querySelectorAll<HTMLElement>(".live-term[data-detail]");
+    const details = document.querySelectorAll<HTMLElement>(".summary-detail");
+    let activeId = "";
+
+    const closeAll = () => {
+      details.forEach((detail) => {
+        detail.hidden = true;
+      });
+      document.querySelectorAll<HTMLButtonElement>(".live-term-button").forEach((button) => {
+        button.setAttribute("aria-expanded", "false");
+      });
+      activeId = "";
+    };
+
+    terms.forEach((term) => {
+      const id = term.dataset.detail;
+      if (!id) return;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "live-term-button";
+      button.textContent = term.textContent;
+      button.setAttribute("aria-expanded", "false");
+      button.setAttribute("aria-controls", `detail-${id}`);
+      term.replaceWith(button);
+      let pointerFocus = false;
+
+      const open = () => {
+        const detail = document.querySelector<HTMLElement>(`#detail-${id}`);
+        if (!detail) return;
+        closeAll();
+        detail.hidden = false;
+        button.setAttribute("aria-expanded", "true");
+        activeId = id;
+      };
+
+      button.addEventListener("pointerenter", (event) => {
+        if (event.pointerType === "mouse") open();
+      });
+      button.addEventListener("pointerdown", () => {
+        pointerFocus = true;
+      });
+      button.addEventListener("focus", () => {
+        if (!pointerFocus) open();
+      });
+      button.addEventListener("click", (event) => {
+        if (event.detail === 0) open();
+        else if (activeId === id) closeAll();
+        else open();
+        pointerFocus = false;
+      });
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+      const target = event.target;
+      if (target instanceof Node && !document.querySelector(".summary-wrap")?.contains(target)) {
+        closeAll();
+      }
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .home-intro {
+    padding-top: 48px;
+  }
+
+  h1 {
+    max-width: 18ch;
+    margin: 0 0 44px;
+    font: 500 1.75rem/1.22 "Newsreader", serif;
+  }
+
+  .summary-wrap {
+    position: relative;
+  }
+
+  .summary-prose {
+    max-width: 66ch;
+    font: 400 1.375rem/1.62 "Newsreader", serif;
+  }
+
+  .summary-prose p {
+    margin: 0 0 1.15em;
+  }
+
+  .live-term {
+    text-decoration: underline;
+    text-decoration-color: var(--rule-2);
+    text-decoration-style: dotted;
+    text-underline-offset: 0.14em;
+  }
+
+  :global(.live-term-button) {
+    display: inline;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px dotted var(--ink-2);
+    background: transparent;
+    color: inherit;
+    cursor: help;
+    font: inherit;
+    line-height: inherit;
+  }
+
+  :global(.live-term-button:hover),
+  :global(.live-term-button[aria-expanded="true"]) {
+    border-color: var(--live);
+    color: var(--live);
+  }
+
+  .summary-readout {
+    min-height: 92px;
+    margin-top: 32px;
+  }
+
+  .summary-detail {
+    max-width: 360px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--rule-2);
+    border-bottom: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--ink-2);
+    animation: readout-in 140ms ease-out;
+    font: 400 0.75rem/1.5 "IBM Plex Mono", monospace;
+  }
+
+  .readout-label {
+    margin: 0 0 8px;
+    color: var(--ink-3);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+  }
+
+  .readout-value {
+    margin: 0;
+  }
+
+  .modality-map {
+    display: grid;
+    grid-template-columns: 42px 42px 1fr;
+    align-items: center;
+    gap: 3px 8px;
+  }
+
+  .modality-map span {
+    color: var(--ink);
+  }
+
+  .modality-map i {
+    height: 1px;
+    background: var(--rule-2);
+  }
+
+  .modality-map b {
+    grid-row: 1 / 4;
+    grid-column: 3;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    padding-left: 9px;
+    border-left: 1px solid var(--rule-2);
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  @keyframes readout-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (min-width: 1120px) {
+    .summary-prose {
+      max-width: 620px;
+    }
+
+    .summary-readout {
+      position: absolute;
+      top: 4px;
+      left: calc(100% + 32px);
+      width: 190px;
+      min-height: 0;
+      margin: 0;
+    }
+
+    .summary-detail {
+      width: 190px;
+    }
+  }
+
+  @media (max-width: 719px) {
+    .home-intro {
+      padding-top: 4px;
+    }
+
+    h1 {
+      margin-bottom: 32px;
+    }
+
+    .summary-prose {
+      font-size: 1.25rem;
+      line-height: 1.58;
+    }
+  }
+</style>

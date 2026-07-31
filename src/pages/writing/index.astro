@@ -1,0 +1,89 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const essays = (await getCollection("essays", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "UTC",
+  }).format(date);
+---
+
+<BaseLayout
+  title="Writing"
+  description="Brian Lerner writes about healthcare AI research, conferences, and the work of building useful clinical machine learning."
+  image="/og/writing.png"
+  pageClass="writing-page"
+>
+  <header class="page-header">
+    <p class="eyebrow">Notes and essays</p>
+    <h1>Writing</h1>
+    <p>Occasional notes on healthcare AI, research practice, and the rooms where the work gets discussed.</p>
+  </header>
+
+  <ol class="essay-list">
+    {
+      essays.map((essay) => (
+        <li>
+          <time datetime={essay.data.date.toISOString()}>{formatDate(essay.data.date)}</time>
+          <div>
+            <h2><a href={`/writing/${essay.id}/`}>{essay.data.title}</a></h2>
+            <p>{essay.data.summary}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</BaseLayout>
+
+<style>
+  .essay-list {
+    margin: 28px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+    list-style: none;
+  }
+
+  .essay-list li {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 24px;
+    padding: 22px 0 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-list time {
+    padding-top: 3px;
+    color: var(--ink-3);
+    font: 400 0.6875rem/1.4 "IBM Plex Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .essay-list h2 {
+    margin: 0;
+    font: 500 1.125rem/1.35 "Newsreader", serif;
+  }
+
+  .essay-list p {
+    max-width: 58ch;
+    margin: 7px 0 0;
+    color: var(--ink-2);
+    font: 400 0.9375rem/1.5 "Newsreader", serif;
+  }
+
+  @media (max-width: 520px) {
+    .essay-list li {
+      display: block;
+    }
+
+    .essay-list time {
+      display: block;
+      margin-bottom: 8px;
+    }
+  }
+</style>

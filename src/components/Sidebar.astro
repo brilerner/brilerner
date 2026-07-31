@@ -1,0 +1,57 @@
+---
+import { Moon, Sun } from "@lucide/astro";
+import { navigation, site } from "../data/site";
+
+const currentPath = Astro.url.pathname;
+const isCurrent = (href: string) =>
+  href === "/" ? currentPath === href : currentPath.startsWith(href);
+---
+
+<aside class="sidebar" aria-label="Site sidebar">
+  <div>
+    <a class="site-name" href="/">{site.name}</a>
+    <p class="identity">{site.identity}</p>
+  </div>
+
+  <nav class="primary-nav" aria-label="Primary navigation">
+    <ul>
+      {
+        navigation.map(({ href, label }) => (
+          <li>
+            <a href={href} aria-current={isCurrent(href) ? "page" : undefined}>
+              <span>{label}</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  <div class="sidebar-links" aria-label="Profiles and contact">
+    <a href={`mailto:${site.email}`}>email</a>
+    <a href={site.scholar} rel="me">scholar</a>
+    <a href={site.github} rel="me">github</a>
+    <a href={site.linkedin} rel="me">linkedin</a>
+  </div>
+
+  <section class="education" aria-labelledby="education-label">
+    <h2 id="education-label">Education</h2>
+    <p>
+      <span>Duke University</span>
+      PhD candidate, ECE
+      <time>2021–present</time>
+    </p>
+    <p>
+      <span>Rutgers University</span>
+      BSc physics
+      <time>2019</time>
+    </p>
+  </section>
+
+  <button class="theme-toggle" type="button" aria-label="Use dark theme">
+    <Moon class="theme-icon theme-icon-moon" size={15} stroke-width={1.5} aria-hidden="true" />
+    <Sun class="theme-icon theme-icon-sun" size={15} stroke-width={1.5} aria-hidden="true" />
+    <span class="theme-label">dark</span>
+  </button>
+</aside>
