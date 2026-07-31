@@ -12,6 +12,7 @@ year: 2025
 field: clinical
 status: published
 doi: "https://doi.org/10.1109/BHI67747.2025.11269507"
+pdf: "https://openreview.net/pdf?id=i2OrLavTIn"
 bibtex: |
   @inproceedings{Manjunath_2025_BHI,
     title = {Personalized Case- and Evidence-Based TBI Prognosis with Small Language Models},

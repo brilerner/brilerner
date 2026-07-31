@@ -11,7 +11,7 @@ venue: "Proceedings of the Fifth Machine Learning for Health Symposium, PMLR 297
 year: 2026
 field: clinical
 status: published
-pdf: "https://raw.githubusercontent.com/mlresearch/v297/main/assets/heile26a/heile26a.pdf"
+pdf: "https://proceedings.mlr.press/v297/heile26a/heile26a.pdf"
 code: "https://github.com/zakk-h/ContextAwareFiltering"
 bibtex: |
   @InProceedings{pmlr-v297-heile26a,

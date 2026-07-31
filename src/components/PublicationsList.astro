@@ -101,7 +101,11 @@ const filterOptions = Object.entries(labels) as [keyof typeof labels, string][];
                       publication.data.code ||
                       publication.data.bibtex) && (
                       <div class="publication-links">
-                        {publication.data.pdf && <a href={publication.data.pdf}>pdf</a>}
+                        {publication.data.pdf && (
+                          <a href={publication.data.pdf} target="_blank" rel="noreferrer">
+                            pdf
+                          </a>
+                        )}
                         {publication.data.doi && <a href={publication.data.doi}>doi</a>}
                         {publication.data.code && <a href={publication.data.code}>code</a>}
                         {publication.data.bibtex && (
