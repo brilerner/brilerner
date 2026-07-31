@@ -15,7 +15,6 @@ const required = [
   "writing/chil-2026/index.html",
   "cv/index.html",
   "cv.pdf",
-  "colophon/index.html",
   "404.html",
   "rss.xml",
   "sitemap-index.xml",

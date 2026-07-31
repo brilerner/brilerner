@@ -137,7 +137,6 @@ const cards = [
   ["publications.png", "Publications", "research record", "Clinical machine learning · quantum materials · instrumentation"],
   ["writing.png", "Writing", "notes and essays", "Healthcare AI · research practice · conferences"],
   ["cv.png", "Curriculum vitae", "complete archive", "Research · publications · teaching · service"],
-  ["colophon.png", "Why this site looks like a readout", "colophon", "What gets measured, shown, and excluded"],
 ];
 
 for (const [filename, title, label, detail] of cards) {
