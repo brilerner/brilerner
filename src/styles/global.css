@@ -215,36 +215,6 @@ a {
   text-decoration: none;
 }
 
-.education {
-  color: var(--ink-2);
-}
-
-.education h2 {
-  margin: 0 0 12px;
-  color: var(--ink-3);
-  font: 500 0.6875rem/1.2 "IBM Plex Mono", monospace;
-  text-transform: uppercase;
-}
-
-.education p {
-  display: grid;
-  gap: 2px;
-  margin: 0 0 12px;
-  font-size: 0.75rem;
-  line-height: 1.4;
-}
-
-.education p span {
-  color: var(--ink);
-  font-family: "IBM Plex Sans", sans-serif;
-  font-size: 0.8125rem;
-}
-
-.education time {
-  font-family: "IBM Plex Mono", monospace;
-  font-variant-numeric: tabular-nums;
-}
-
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -407,17 +377,6 @@ main {
   }
 
   .sidebar-links {
-    grid-column: 1 / -1;
-  }
-
-  .education {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 20px;
-  }
-
-  .education h2 {
     grid-column: 1 / -1;
   }
 
