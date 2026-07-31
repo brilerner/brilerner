@@ -253,7 +253,7 @@ main {
 }
 
 .page-header {
-  padding-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--rule-2);
 }
 
