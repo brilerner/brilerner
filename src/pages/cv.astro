@@ -17,8 +17,6 @@ const description =
     </a>
   </header>
 
-  <p class="cv-readout">Brian Lerner · PhD candidate, ECE · updated 2026-07</p>
-
   <object class="cv-embed" data="/cv.pdf" type="application/pdf" aria-label="Brian Lerner curriculum vitae">
     <div class="cv-fallback">
       <p>This browser cannot display the embedded PDF.</p>
@@ -54,14 +52,9 @@ const description =
     border-color: var(--ink);
   }
 
-  .cv-readout {
-    margin: 14px 0;
-    color: var(--ink-3);
-    font: 400 0.6875rem/1.4 "IBM Plex Mono", monospace;
-  }
-
   .cv-embed {
     display: block;
+    margin-top: 14px;
     width: 100%;
     height: min(76vh, 960px);
     border: 1px solid var(--rule-2);
