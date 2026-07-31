@@ -9,6 +9,7 @@ year: 2025
 field: clinical
 status: published
 doi: "https://doi.org/10.1109/JBHI.2025.3622508"
+pdf: "/papers/2025_Manjunath-trust-your-neighbors.pdf"
 bibtex: |
   @article{Manjunath_2025,
     title = {Trust Your Neighbors: Multimodal Patient Retrieval for TBI Prognosis},
